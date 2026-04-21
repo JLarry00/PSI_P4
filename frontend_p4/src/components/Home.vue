@@ -11,7 +11,9 @@
       <!-- Aquí se mostrarán las canciones más populares obtenidas desde la API -->
       <!-- Falta implementar la obtención de canciones más populares -->
       <ul>
-        <!-- Ejemplo de lista (se llenará dinámicamente cuando se implemente la API) -->
+        <li v-for="song in popularSongs" :key="song.id">
+            <router-link :to="`/songs/${song.id}`">{{ song.title }} — Reproducida {{ song.number_times_played }} veces</router-link>
+        </li>
       </ul>
     </section>
 
@@ -28,6 +30,9 @@
       <!-- Aquí se mostrarán los resultados de búsqueda obtenidos desde la API -->
       <ul v-if="searchResults.length">
         <!-- Resultado de búsqueda de canciones irá aquí cuando se implemente la API -->
+        <li v-for="song in searchResults" :key="song.id">
+          <router-link :to="`/songs/${song.id}`">{{ song.title }}</router-link>
+        </li>
       </ul>
       <div v-else-if="searchPerformed">No se encontraron canciones.</div>
     </section>
@@ -36,44 +41,99 @@
       <button @click="showRandomSong">Muestrame una canción al azar</button>
       <!-- Aquí se mostrará la sugerencia aleatoria obtenida desde la API -->
       <div v-if="randomSong">
-        <!-- Sugerencia de canción aleatoria irá aquí cuando se implemente la API -->
+        <router-link :to="`/songs/${randomSong.id}`">{{ randomSong.title }}</router-link>
       </div>
     </section>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
 
-// Aquí se deberá implementar la llamada real a la API para obtener canciones
-// Por ahora, dejar la implementación vacía o con mensajes indicando que falta por implementar
+/** Rutas según `links_backend.txt` (songproject.urls). */
+const SONGS_TOP_URL = '/api/v1/songs/top/'
+const SONGS_SEARCH_URL = '/api/v1/songs/search/'
+const SONGS_RANDOM_URL = '/api/v1/songs/random/'
+
+/** Sin VITE_API_BASE_URL: URL relativa → proxy de Vite a Django. */
+function backendUrl(path) {
+  const base = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+  const p = path.startsWith('/') ? path : `/${path}`
+  return base ? `${base}${p}` : p
+}
+
+function normalizeSongList(data) {
+  if (Array.isArray(data)) return data
+  if (data?.results && Array.isArray(data.results)) return data.results
+  if (data?.songs && Array.isArray(data.songs)) return data.songs
+  return []
+}
 
 const popularSongs = ref([])
 const searchQuery = ref('')
 const searchResults = ref([])
 const searchPerformed = ref(false)
 const randomSong = ref(null)
-const router = useRouter()
 
-// Falta implementar la obtención de las canciones más populares desde la API
-// onMounted(async () => {
-//   popularSongs.value = await fetchPopularSongs()
-// });
+onMounted(async () => {
+  try {
+    const response = await fetch(backendUrl(SONGS_TOP_URL))
+    if (!response.ok) {
+      console.error(
+        'Top canciones: respuesta HTTP',
+        response.status,
+        await response.text().catch(() => '')
+      )
+      return
+    }
+    const data = await response.json()
+    const songs = normalizeSongList(data)
+    popularSongs.value = songs.slice(0, 3)
+  } catch (e) {
+    console.error('Top canciones: error de red o CORS', e)
+  }
+})
 
-// Falta implementar la búsqueda real de canciones por título
 async function searchSongs() {
-  // Aquí va la llamada a la API para buscar canciones por el título
-  // Falta por implementar
-  searchResults.value = []
-  searchPerformed.value = true
+  const q = searchQuery.value.trim()
+  if (!q) {
+    searchResults.value = []
+    searchPerformed.value = true
+    return
+  }
+  try {
+    const params = new URLSearchParams({ title: q })
+    const response = await fetch(
+      `${backendUrl(SONGS_SEARCH_URL)}?${params.toString()}`
+    )
+    if (!response.ok) {
+      console.error('Búsqueda de canciones: respuesta HTTP', response.status, await response.text().catch(() => ''))
+      searchResults.value = []
+      searchPerformed.value = true
+      return
+    }
+    const data = await response.json()
+    searchResults.value = normalizeSongList(data)
+    searchPerformed.value = true
+  } catch (e) {
+    console.error('Búsqueda de canciones: error de red o CORS', e)
+    searchPerformed.value = true
+  }
 }
 
-// Falta implementar la obtención real de una canción aleatoria desde la API
 async function showRandomSong() {
-  // Aquí va la llamada a la API para obtener una canción aleatoria
-  // Falta por implementar
-  randomSong.value = null
+  try {
+    const response = await fetch(backendUrl(SONGS_RANDOM_URL))
+    if (!response.ok) {
+      console.error('Canción aleatoria: respuesta HTTP', response.status, await response.text().catch(() => ''))
+      randomSong.value = null
+      return
+    }
+    randomSong.value = await response.json()
+  } catch (e) {
+    console.error('Canción aleatoria: error de red o CORS', e)
+    randomSong.value = null
+  }
 }
 </script>
 
