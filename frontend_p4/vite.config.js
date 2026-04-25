@@ -9,7 +9,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        target: 'https://three-songproject-99-2311-2026-v1.onrender.com',
         changeOrigin: true
       }
     }
