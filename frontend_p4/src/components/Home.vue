@@ -1,48 +1,50 @@
 <template>
-  <div class="home-container">
-    <h2>Bienvenido a la Aplicación de Canciones</h2>
-    <p>
-      Esta aplicación te permite descubrir, buscar y reproducir tus canciones favoritas.
-      Explora las canciones más populares, encuentra canciones por su título, o déjanos elegir una canción al azar para ti.
-    </p>
-    
-    <section class="popular-songs">
-      <h3>Las 3 Canciones Más Populares</h3>
-      <!-- Aquí se mostrarán las canciones más populares obtenidas desde la API -->
-      <!-- Falta implementar la obtención de canciones más populares -->
-      <ul>
+  <div class="home-content">
+    <section class="surface-card home-section">
+      <h2>Las 3 Canciones Más Populares</h2>
+      <ul class="home-list">
         <li v-for="song in popularSongs" :key="song.id">
-            <router-link :to="`/songs/${song.id}`">{{ song.title }} — Reproducida {{ song.number_times_played }} veces</router-link>
+          <router-link :to="`/songs/${song.id}`" class="song-link">
+            {{ song.title }} — Reproducida {{ song.number_times_played }} veces
+          </router-link>
         </li>
       </ul>
     </section>
 
-    <section class="search-section">
-      <h3>Buscar Canciones por Título</h3>
-      <form @submit.prevent="searchSongs">
+    <section class="surface-card home-section">
+      <h2>Buscar Canciones por Título</h2>
+      <form class="search-form" @submit.prevent="searchSongs">
         <input
+          class="search-input"
           type="text"
           v-model="searchQuery"
           placeholder="Introduce el título de la canción"
         />
-        <button type="submit">Buscar</button>
+        <button class="action-button" type="submit">Buscar</button>
       </form>
-      <!-- Aquí se mostrarán los resultados de búsqueda obtenidos desde la API -->
-      <ul v-if="searchResults.length">
-        <!-- Resultado de búsqueda de canciones irá aquí cuando se implemente la API -->
+      <ul v-if="searchResults.length" class="home-list">
         <li v-for="song in searchResults" :key="song.id">
-          <router-link :to="`/songs/${song.id}`">{{ song.title }}</router-link>
+          <router-link :to="`/songs/${song.id}`" class="song-link">
+            {{ song.title }}
+          </router-link>
         </li>
       </ul>
-      <div v-else-if="searchPerformed">No se encontraron canciones.</div>
+      <p v-else-if="searchPerformed" class="helper-text">No se encontraron canciones.</p>
     </section>
 
-    <section class="random-song">
-      <button @click="showRandomSong">Muestrame una canción al azar</button>
-      <!-- Aquí se mostrará la sugerencia aleatoria obtenida desde la API -->
-      <div v-if="randomSong">
-        <router-link :to="`/songs/${randomSong.id}`">{{ randomSong.title }}</router-link>
-      </div>
+    <section class="surface-card home-section">
+      <h2>Explorar al azar</h2>
+      <p class="helper-text">
+        Si no sabes qué escuchar, deja que la aplicación te sugiera una canción.
+      </p>
+      <button class="action-button" @click="showRandomSong">
+        Muestrame una canción al azar
+      </button>
+      <p v-if="randomSong" class="random-result">
+        <router-link :to="`/songs/${randomSong.id}`" class="song-link">
+          {{ randomSong.title }}
+        </router-link>
+      </p>
     </section>
   </div>
 </template>
@@ -138,30 +140,75 @@ async function showRandomSong() {
 </script>
 
 <style scoped>
-.home-container {
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 2rem;
+.home-content {
+  display: grid;
+  gap: 1.25rem;
 }
 
-.popular-songs ul,
-.search-section ul {
+.home-section {
+  display: grid;
+  gap: 1rem;
+}
+
+.home-section h2 {
+  font-size: 1.35rem;
+}
+
+.home-list {
   list-style: none;
   padding: 0;
+  display: grid;
+  gap: 0.75rem;
 }
 
-.popular-songs li,
-.search-section li {
-  margin-bottom: 0.5rem;
+.song-link {
+  color: var(--accent-strong);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
 }
 
-.search-section form {
+.song-link:hover {
+  color: #c2410c;
+}
+
+.search-form {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
-.random-song {
-  margin-top: 2rem;
+.search-input {
+  flex: 1 1 280px;
+  min-height: 44px;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #d6d3d1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--text-main);
+}
+
+.action-button {
+  min-height: 44px;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.action-button:hover {
+  filter: brightness(1.03);
+}
+
+.helper-text {
+  color: var(--text-soft);
+}
+
+.random-result {
+  margin: 0;
 }
 </style>

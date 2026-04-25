@@ -1,0 +1,77 @@
+:root {
+  --app-bg:
+    radial-gradient(circle at top left, rgba(251, 191, 36, 0.2), transparent 28%),
+    linear-gradient(180deg, #fffdf8 0%, #fff7ed 100%);
+  --panel-bg: linear-gradient(180deg, #1c1917 0%, #292524 100%);
+  --panel-border: rgba(146, 64, 14, 0.12);
+  --accent-soft: #fffaf5;
+  --accent-strong: #9a3412;
+  --text-main: #1f2937;
+  --text-soft: #4b5563;
+  --card-border: #e5e7eb;
+  --card-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  --page-pad-x: clamp(1.25rem, 2vw + 0.75rem, 2.5rem);
+  --page-pad-y: clamp(1.5rem, 1.6vw + 1rem, 2.5rem);
+  --page-max-narrow: 40rem;
+  --page-max-default: 60rem;
+  --page-max-wide: 76rem;
+}
+
+.page-hero {
+  margin-bottom: 2rem;
+}
+
+.page-eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+.page-title {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.1;
+  color: var(--text-main);
+}
+
+.page-intro {
+  max-width: 60ch;
+  margin: 1rem 0 0;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--text-soft);
+}
+
+.card-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.surface-card {
+  padding: 1.25rem 1.4rem;
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--accent-soft) 0%, #ffffff 100%);
+  box-shadow: var(--card-shadow);
+}
+
+.surface-card h2,
+.surface-card h3 {
+  margin: 0 0 0.6rem;
+  color: #111827;
+}
+
+.surface-card p {
+  margin: 0;
+  line-height: 1.7;
+  color: #374151;
+}
+
+@media (min-width: 768px) {
+  .card-grid.two-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
