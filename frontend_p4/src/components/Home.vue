@@ -56,11 +56,7 @@ const SONGS_SEARCH_URL = '/api/v1/songs/search/'
 const SONGS_RANDOM_URL = '/api/v1/songs/random/'
 
 /** Sin VITE_API_BASE_URL: URL relativa → proxy de Vite a Django. */
-function backendUrl(path) {
-  const base = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
-  const p = path.startsWith('/') ? path : `/${path}`
-  return base ? `${base}${p}` : p
-}
+import { backendUrl } from '@/utils/backendUrl.js'
 
 function normalizeSongList(data) {
   if (Array.isArray(data)) return data
