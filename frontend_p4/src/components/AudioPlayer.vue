@@ -7,7 +7,7 @@ const props = defineProps({
   resumeTick: { type: Number, default: 0 }
 })
 
-const emit = defineEmits(['onTimeUpdate', 'onEnded'])
+const emit = defineEmits(['onTimeUpdate', 'onEnded', 'syncPlay', 'syncPause'])
 
 const audio = ref(null)
 
@@ -50,6 +50,8 @@ watch(
       preload="metadata"
       @timeupdate="emitTimeUpdate"
       @ended="emitEnded"
+      @play="emit('syncPlay')"
+      @pause="emit('syncPause')"
     />
   </div>
   <p v-else class="no-audio">No hay audio disponible para esta canción.</p>

@@ -35,6 +35,8 @@ async function loadSong() {
   } finally {
     loading.value = false
   }
+
+  console.log(song.value)
 }
 
 watch(() => props.id, loadSong, { immediate: true })
@@ -59,7 +61,7 @@ function onLyricsStart() {
 async function onSummary({ correct, wrong }) {
   if (!auth.isAuthenticated || !song.value) return
   try {
-    await fetch(backendUrl('/api/v1/songusers/'), {
+    const response = await fetch(backendUrl('/api/v1/songusers/'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -71,6 +73,21 @@ async function onSummary({ correct, wrong }) {
         wrong_answers: wrong
       })
     })
+
+    if (response.status === 401) {
+      console.warn('Token expirado o inválido. Cerrando sesión automáticamente.')
+      auth.clearSession()
+      return
+    }
+
+    if (!response.ok) {
+      console.error('Error al guardar reproducciones:', await response.text())
+      return
+    }
+
+    // Reflejamos el cambio en la UI localmente si fue exitoso
+    song.value.number_times_played += 1
+    
   } catch (e) {
     console.error('SongUser:', e)
   }
@@ -101,6 +118,8 @@ async function onSummary({ correct, wrong }) {
         :resume-tick="resumeTick"
         @on-time-update="handleTimeUpdate"
         @on-ended="handleEnded"
+        @sync-play="stopAudio = false"
+        @sync-pause="stopAudio = true"
       />
 
       <LyricsDisplay

@@ -30,8 +30,7 @@ function parseLrcTimestamp(line) {
   if (!m) return null
   const min = Number(m[1])
   const sec = Number(m[2])
-  const frac = Number(m[3])
-  const seconds = min * 60 + sec + frac / 100
+  const seconds = min * 60 + sec + parseFloat('0.' + m[3])
   const rest = m[4]
   const bm = rest.match(/^(.*)\{([^}]+)\}(.*)$/)
   if (bm) {
@@ -50,7 +49,7 @@ function parseLrc(text) {
   const out = []
   for (const raw of text.split(/\r?\n/)) {
     const line = raw.trim()
-    if (!line || /^\[[^:\]]+:/.test(line)) continue
+    if (!line || /^\[[a-zA-Z]+:/.test(line)) continue
     const parsed = parseLrcTimestamp(line)
     if (parsed) out.push(parsed)
   }
@@ -93,6 +92,13 @@ watch(currentIndex, (ci) => {
     blankInput.value = ''
     return
   }
+  
+  // Bloqueo: No avanzar el activeBlankLineIndex si hay una palabra pendiente sin resolver
+  const active = activeBlankLineIndex.value
+  if (active !== -1 && !lineSolved.value.has(active) && !skippedLines.value.has(active)) {
+    return 
+  }
+
   const line = lines[ci]
   if (line.blank && !lineSolved.value.has(ci) && !skippedLines.value.has(ci)) {
     activeBlankLineIndex.value = ci
@@ -150,8 +156,10 @@ watch(
     const lines = lrcLines.value
     if (idx < 0 || !lines[idx]?.blank) return
     if (skippedLines.value.has(idx) || lineSolved.value.has(idx)) return
-    const end = nextLineTime.value
-    if (Number.isFinite(end) && t >= end - 0.05) {
+    
+    // Opción A: Calcula el tiempo final y aplica un margen de 250ms para cazar el evento
+    const end = idx < lines.length - 1 ? lines[idx + 1].time : Infinity
+    if (t >= end - 0.25) {
       emit('stopAudio')
     }
   }
@@ -211,7 +219,7 @@ function displayLine(entry) {
   const solved = line.blank && (lineSolved.value.has(index) || skippedLines.value.has(index))
   if (!line.blank) return line.full
   if (solved) return line.full
-  return null
+  return `${line.before}_____${line.after}`
 }
 </script>
 
@@ -221,7 +229,7 @@ function displayLine(entry) {
     <template v-else-if="lrcLines.length">
       <div class="lyrics-window" aria-live="polite">
         <p v-if="visibleSlice.prev" class="line prev">
-          {{ displayLine(visibleSlice.prev) ?? visibleSlice.prev.line.full }}
+          {{ displayLine(visibleSlice.prev) }}
         </p>
         <p v-if="visibleSlice.curr" class="line curr">
           <template v-if="visibleSlice.curr.line.blank && activeBlankLineIndex === visibleSlice.curr.index">
@@ -238,11 +246,11 @@ function displayLine(entry) {
             <button type="button" class="skip-btn" @click="skipBlank">Skip</button>
           </template>
           <template v-else>
-            {{ displayLine(visibleSlice.curr) ?? visibleSlice.curr.line.full }}
+            {{ displayLine(visibleSlice.curr) }}
           </template>
         </p>
         <p v-if="visibleSlice.next" class="line next">
-          {{ displayLine(visibleSlice.next) ?? visibleSlice.next.line.full }}
+          {{ displayLine(visibleSlice.next) }}
         </p>
       </div>
       <p v-if="playbackEnded && summaryShown" class="summary">
