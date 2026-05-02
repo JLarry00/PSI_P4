@@ -1,12 +1,22 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { computed } from 'vue'
 
-const menuItems = [
-  { to: '/', label: 'Inicio' },
-  { to: '/faq', label: 'FAQ' },
-  { to: '/log-in', label: 'Iniciar sesion' },
-  { to: '/log-out', label: 'Cerrar sesion' },
-]
+const authStore = useAuthStore()
+
+const menuItems = computed(() => {
+  const base = [
+    { to: '/', label: 'Inicio' },
+    { to: '/faq', label: 'FAQ' },
+  ]
+  if (authStore.isAuthenticated) {
+    base.push({ to: '/log-out', label: 'Cerrar sesion' })
+  } else {
+    base.push({ to: '/log-in', label: 'Iniciar sesion' })
+  }
+  return base
+})
 </script>
 
 <template>
@@ -33,6 +43,14 @@ const menuItems = [
     </aside>
 
     <main class="view-panel">
+      <div v-if="authStore.isAuthenticated" class="verified-header">
+        <span class="verified-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#007bff">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          Usuario Verificado
+        </span>
+      </div>
       <RouterView />
     </main>
   </div>
@@ -63,6 +81,28 @@ const menuItems = [
   background: #f6f8fa;
   min-height: 100vh;
   box-sizing: border-box;
+  position: relative; /* Para posicionar el badge */
+}
+
+.verified-header {
+  position: absolute;
+  top: 20px;
+  right: 32px;
+  z-index: 10;
+}
+
+.verified-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #007bff;
+  box-shadow: 0 2px 10px rgba(0, 123, 255, 0.1);
+  border: 1px solid rgba(0, 123, 255, 0.2);
 }
 
 /* Resto de estilos previos */
