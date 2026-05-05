@@ -1,19 +1,38 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
+import { backendUrl } from '@/utils/backendUrl'
 
 const authStore = useAuthStore()
 
+onMounted(async () => {
+  // Si estamos autenticados pero no tenemos datos del usuario (ej: al refrescar)
+  if (authStore.token && !authStore.songUser) {
+    try {
+      const res = await fetch(backendUrl('/api/v1/users/me/'), {
+        headers: { Authorization: `Token ${authStore.token}` }
+      })
+      if (res.ok) {
+        authStore.setSongUser(await res.json())
+      } else if (res.status === 401) {
+        authStore.clearSession()
+      }
+    } catch (e) {
+      console.error('Error recuperando usuario:', e)
+    }
+  }
+})
+
 const menuItems = computed(() => {
   const base = [
-    { to: '/', label: 'Inicio' },
+    { to: '/', label: 'Inicio', cy: 'home-cypress-test' },
     { to: '/faq', label: 'FAQ' },
   ]
   if (authStore.isAuthenticated) {
     base.push({ to: '/log-out', label: 'Cerrar sesion' })
   } else {
-    base.push({ to: '/log-in', label: 'Iniciar sesion' })
+    base.push({ to: '/log-in', label: 'Iniciar sesion', cy: 'login-cypress-test' })
   }
   return base
 })
@@ -36,6 +55,7 @@ const menuItems = computed(() => {
           :key="item.to"
           :to="item.to"
           class="menu-link"
+          :data-cy="item.cy"
         >
           {{ item.label }}
         </RouterLink>
@@ -48,7 +68,7 @@ const menuItems = computed(() => {
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#007bff">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
           </svg>
-          Usuario Verificado
+          {{ authStore.songUser?.username || 'Usuario' }}
         </span>
       </div>
       <RouterView />

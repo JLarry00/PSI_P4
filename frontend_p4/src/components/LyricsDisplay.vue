@@ -109,12 +109,7 @@ watch(currentIndex, (ci) => {
   }
 })
 
-function isPrefixOk(typed, expected) {
-  const a = normalizeWord(typed)
-  const b = normalizeWord(expected)
-  if (!a.length) return true
-  return b.startsWith(a)
-}
+// Se eliminó isPrefixOk ya que ya no se valida en tiempo real.
 
 function onBlankInput() {
   const idx = activeBlankLineIndex.value
@@ -123,18 +118,14 @@ function onBlankInput() {
   const expected = lines[idx].blank
   const val = blankInput.value
 
-  if (!isPrefixOk(val, expected)) {
-    wrongCount.value++
-    emit('stopAudio')
-    return
-  }
-
   if (normalizeWord(val) === normalizeWord(expected)) {
-    lineSolved.value.add(idx)
     correctCount.value++
+    lineSolved.value.add(idx)
     activeBlankLineIndex.value = -1
     blankInput.value = ''
     emit('startAudio')
+  } else {
+    wrongCount.value++
   }
 }
 
@@ -240,10 +231,11 @@ function displayLine(entry) {
               type="text"
               autocomplete="off"
               :aria-label="'Palabra omitida'"
-              @input="onBlankInput"
+              @keydown.enter="onBlankInput"
+              data-cy="blankInput"
             />
             <span>{{ visibleSlice.curr.line.after }}</span>
-            <button type="button" class="skip-btn" @click="skipBlank">Skip</button>
+            <button type="button" class="skip-btn" @click="skipBlank" data-cy="skip">Skip</button>
           </template>
           <template v-else>
             {{ displayLine(visibleSlice.curr) }}
@@ -254,8 +246,7 @@ function displayLine(entry) {
         </p>
       </div>
       <p v-if="playbackEnded && summaryShown" class="summary">
-        Fin de la canción: {{ correctCount }} aciertos, {{ wrongCount }} fallos
-        ({{ Math.round((correctCount + wrongCount) ? (correctCount / (correctCount + wrongCount)) * 100 : 100) }}% aciertos sobre intentos valorados).
+        Correct answers: {{ correctCount }} - Wrong answers: {{ wrongCount }}
       </p>
     </template>
   </section>

@@ -24,21 +24,22 @@
           type="text"
           v-model="searchQuery"
           placeholder="Introduce el título de la canción"
+          data-cy="search_text"
         />
-        <button type="submit">Buscar</button>
+        <button type="submit" data-cy="search_button">Buscar</button>
       </form>
       <!-- Aquí se mostrarán los resultados de búsqueda obtenidos desde la API -->
       <ul v-if="searchResults.length">
         <!-- Resultado de búsqueda de canciones irá aquí cuando se implemente la API -->
         <li v-for="song in searchResults" :key="song.id">
-          <router-link :to="`/songs/${song.id}`">{{ song.title }}</router-link>
+          <router-link :to="`/songs/${song.id}`" :data-cy="song.title">{{ song.title }}</router-link>
         </li>
       </ul>
       <div v-else-if="searchPerformed">No se encontraron canciones.</div>
     </section>
 
     <section class="random-song">
-      <button @click="showRandomSong">Muestrame una canción al azar</button>
+      <button @click="showRandomSong">Random song</button>
       <!-- Aquí se mostrará la sugerencia aleatoria obtenida desde la API -->
       <div v-if="randomSong">
         <router-link :to="`/songs/${randomSong.id}`">{{ randomSong.title }}</router-link>

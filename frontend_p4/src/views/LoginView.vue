@@ -31,8 +31,17 @@ const handleLogin = async () => {
     // Djoser devuelve { auth_token: '...' }
     authStore.setToken(data.auth_token) 
     
-    // Si quieres obtener datos del usuario, podrías hacer otra petición a /api/v1/users/me/
-    // const userResponse = await fetch(backendUrl('/api/v1/users/me/'), { ... })
+    // Obtener datos del usuario logueado
+    const userResponse = await fetch(backendUrl('/api/v1/users/me/'), {
+      headers: {
+        Authorization: `Token ${data.auth_token}`
+      }
+    })
+    
+    if (userResponse.ok) {
+      const userData = await userResponse.json()
+      authStore.setSongUser(userData)
+    }
 
     router.push('/')
 
@@ -53,14 +62,16 @@ const handleLogin = async () => {
           v-model="username" 
           placeholder="username" 
           required 
+          data-cy="username"
         />
         <input 
           type="password" 
           v-model="password" 
           placeholder="password" 
           required 
+          data-cy="password"
         />
-        <button type="submit" style="background-color: #007bff; color: white; padding: 10px; border: none; cursor: pointer;">
+        <button type="submit" data-cy="login-button" style="background-color: #007bff; color: white; padding: 10px; border: none; cursor: pointer;">
           INICIAR SESIÓN
         </button>
       </form>

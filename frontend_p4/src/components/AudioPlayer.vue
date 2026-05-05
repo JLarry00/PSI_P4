@@ -45,6 +45,7 @@ watch(
   <div v-if="song && audioSrc()" class="audio-player">
     <audio
       ref="audio"
+      id="my-audio"
       :src="audioSrc()"
       controls
       preload="metadata"

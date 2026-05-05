@@ -69,8 +69,8 @@ async function onSummary({ correct, wrong }) {
       },
       body: JSON.stringify({
         song: song.value.id,
-        correct_answers: correct,
-        wrong_answers: wrong
+        correct_guesses: correct,
+        wrong_guesses: wrong
       })
     })
 
