@@ -19,6 +19,7 @@ const resumeTick = ref(0)
 const playbackEnded = ref(false)
 
 const detailUrl = computed(() => backendUrl(`/api/v1/songs/${props.id}/`))
+const coverUrl = computed(() => backendUrl(song.value?.background_image ?? ''))
 
 async function loadSong() {
   loading.value = true
@@ -101,8 +102,8 @@ async function onSummary({ correct, wrong }) {
     <article v-else-if="song" class="song-play">
       <header class="header">
         <img
-          v-if="song.background_image"
-          :src="song.background_image"
+          v-if="coverUrl"
+          :src="coverUrl"
           alt=""
           class="cover"
         />

@@ -181,7 +181,7 @@ async function loadLrc() {
     return
   }
   try {
-    const res = await fetch(url.startsWith('http') ? url : backendUrl(url))
+    const res = await fetch(backendUrl(url))
     if (!res.ok) throw new Error(String(res.status))
     lrcText.value = await res.text()
     lrcLines.value = parseLrc(lrcText.value)

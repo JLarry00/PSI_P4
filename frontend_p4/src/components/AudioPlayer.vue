@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
+import { backendUrl } from '@/utils/backendUrl.js'
 
 const props = defineProps({
   song: { type: Object, default: null },
@@ -11,7 +12,7 @@ const emit = defineEmits(['onTimeUpdate', 'onEnded', 'syncPlay', 'syncPause'])
 
 const audio = ref(null)
 
-const audioSrc = () => props.song?.audio_file ?? props.song?.audioURL ?? ''
+const audioSrc = () => backendUrl(props.song?.audio_file ?? props.song?.audioURL ?? '')
 
 function emitTimeUpdate() {
   const el = audio.value
