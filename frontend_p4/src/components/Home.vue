@@ -51,7 +51,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-/** Rutas según `links_backend.txt` (songproject.urls). */
 const SONGS_TOP_URL = '/api/v1/songs/top/'
 const SONGS_SEARCH_URL = '/api/v1/songs/search/'
 const SONGS_RANDOM_URL = '/api/v1/songs/random/'
